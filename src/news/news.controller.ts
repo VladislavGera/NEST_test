@@ -6,9 +6,17 @@ import { NewsService } from '../service/products.service';
 export class NewsController {
   constructor(private newsService: NewsService) {}
 
-  @Get()
-  getNews() {
-    return this.newsService.getNewsPortion();
+  @Get('page/:page')
+  getNews(@Param('page') page) {
+    return this.newsService.getNewsPortion(page);
+  }
+  // value
+  @Get('newsBy/:category/value/:value')
+  getNewsByCategory(
+    @Param('category') category,
+    @Param('value') value: string,
+  ) {
+    return this.newsService.getNewsBy({ category, value });
   }
 
   @Get(':id')

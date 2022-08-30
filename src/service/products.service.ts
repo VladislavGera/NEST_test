@@ -5,9 +5,30 @@ import { CreateNewsDto } from 'src/dto/create-news.dto';
 export class NewsService {
   private news: any[] = [];
 
-  getNewsPortion() {
-    /// get pagination portion
-    return this.news;
+  getNewsPortion(page) {
+    let pageSize = 10;
+    let portionNewsList = this.news.slice(
+      (page - 1) * pageSize,
+      page * pageSize,
+    );
+
+    return portionNewsList;
+  }
+
+  getNewsBy(data) {
+    let newsByCategory = this.news.filter((item) => {
+      if (data.category == 'name') {
+        return data.value === item.name;
+      }
+      if (data.category == 'likes') {
+        return data.value < item.likes;
+      }
+      if (data.category == 'title') {
+        return data.value === item.title;
+      }
+    });
+
+    return newsByCategory;
   }
 
   getNewsById(id: string) {
