@@ -1,41 +1,49 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateNewsDto } from 'src/dto/create-news.dto';
+import { News } from '../schemas/news.schema';
+import { NewsDocument } from '../schemas/news.schema';
 
 @Injectable()
 export class NewsService {
-  private news: any[] = [];
+  constructor(@InjectModel(News.name) private newsModel: Model<NewsDocument>) {}
 
-  getNewsPortion(page) {
+  async getNewsPortion(page): Promise<any[]> {
     let pageSize = 10;
-    let portionNewsList = this.news.slice(
-      (page - 1) * pageSize,
-      page * pageSize,
-    );
+    const skips = page * (pageSize - 1);
 
-    return portionNewsList;
+    return this.newsModel.find().skip(skips).limit(pageSize);
   }
 
-  getNewsBy(data) {
-    let newsByCategory = this.news.filter((item) => {
-      if (data.category == 'name') {
-        return data.value === item.name;
-      }
-      if (data.category == 'likes') {
-        return data.value < item.likes;
-      }
-      if (data.category == 'title') {
-        return data.value === item.title;
-      }
-    });
+  async getNewsBy(data): Promise<any[]> {
+    let category = data.category;
+    let value = data.value;
 
-    return newsByCategory;
+    if (category == 'name') {
+      return this.newsModel.find({ name: value });
+    }
+    if (category == 'likes') {
+      return this.newsModel.find({ likes: value });
+    }
+    if (category == 'title') {
+      return this.newsModel.find({ title: value });
+    }
+    if (category == 'date') {
+      return this.newsModel.find({ title: value });
+    }
   }
 
-  getNewsById(id: string) {
-    return this.news.find((item) => item.id === id);
+  async getNewsById(id: string): Promise<any> {
+    return this.newsModel.findById(id);
   }
 
-  createNews(newsDto: CreateNewsDto) {
-    this.news.push({ ...newsDto, id: Date.now().toString() });
+  async deleteNews(id: string): Promise<any> {
+    return this.newsModel.findByIdAndRemove(id);
+  }
+
+  createNews(newsDto: CreateNewsDto): Promise<any> {
+    const newProduct = new this.newsModel(newsDto);
+    return newProduct.save();
   }
 }
