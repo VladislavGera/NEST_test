@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateNewsDto } from '../dto/create-news.dto';
 import { NewsService } from '../service/products.service';
 
@@ -11,17 +11,28 @@ export class NewsController {
     return this.newsService.getNewsPortion(page);
   }
 
-  @Get('newsBy/:category/value/:value')
+  @Get('category/:category/value/:value/page/:page')
   getNewsByCategory(
     @Param('category') category,
     @Param('value') value: string,
+    @Param('page') page: string,
   ) {
-    return this.newsService.getNewsBy({ category, value });
+    const categoryObj = { oldKey: value };
+
+    categoryObj[category] = categoryObj['oldKey'];
+    delete categoryObj['oldKey'];
+
+    return this.newsService.getNewsBy({ categoryObj, page });
   }
 
   @Get(':id')
   getDetale(@Param('id') id: string) {
     return this.newsService.getNewsById(id);
+  }
+
+  @Put(':id')
+  updateLikeCount(@Param('id') id: string, @Body() cretaeNewsDto: any) {
+    return this.newsService.updateLikeCount({id, cretaeNewsDto});
   }
 
   @Delete(':id')

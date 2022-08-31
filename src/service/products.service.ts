@@ -17,25 +17,33 @@ export class NewsService {
   }
 
   async getNewsBy(data): Promise<any[]> {
-    let category = data.category;
-    let value = data.value;
+    let pageSize = 10;
 
-    if (category == 'name') {
-      return this.newsModel.find({ name: value });
-    }
-    if (category == 'likes') {
-      return this.newsModel.find({ likes: value });
-    }
-    if (category == 'title') {
-      return this.newsModel.find({ title: value });
-    }
-    if (category == 'date') {
-      return this.newsModel.find({ title: value });
-    }
+    const skips = data.page * (pageSize - 1);
+
+    const news = (
+      await this.newsModel.find(data.categoryObj).skip(skips).limit(pageSize)
+    ).map((item) => {
+      let description = item.description.slice(0, 20);
+      let res = { ...item.toObject(), description };
+      return res;
+    });
+
+    return news;
   }
 
   async getNewsById(id: string): Promise<any> {
-    return this.newsModel.findById(id);
+    let news = await this.newsModel.findById(id);
+
+    const res = {
+      title: news.title,
+      image: news.image,
+      description: news.description,
+      likes: news.likes,
+      _id: news._id,
+    };
+
+    return res;
   }
 
   async deleteNews(id: string): Promise<any> {
@@ -45,5 +53,19 @@ export class NewsService {
   createNews(newsDto: CreateNewsDto): Promise<any> {
     const newProduct = new this.newsModel(newsDto);
     return newProduct.save();
+  }
+
+  async updateLikeCount(data): Promise<any> {
+    const news = await this.getNewsById(data.id);
+
+    if (news.likes < 2000000) {
+      const updateLikesCount = this.newsModel.findByIdAndUpdate(data.id, {
+        likes: news.likes + 1,
+      });
+
+      return updateLikesCount;
+    } else {
+      return { message: 'you have too many likes' };
+    }
   }
 }
