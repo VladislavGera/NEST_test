@@ -1,17 +1,17 @@
-import { Module } from '@nestjs/common';
+import { NewsModule } from './news/news.model';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { NewsController } from './news/news.controller';
-import { NewsService } from './service/products.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
+    NewsModule,
     MongooseModule.forRoot(
       'mongodb+srv://vlad:plkiuplkiu@news.8nsiyan.mongodb.net/?retryWrites=true&w=majority',
     ),
   ],
-  controllers: [AppController, NewsController],
-  providers: [AppService, NewsService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
