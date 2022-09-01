@@ -31,8 +31,8 @@ export class NewsController {
   }
 
   @Put(':id')
-  updateLikeCount(@Param('id') id: string, @Body() cretaeNewsDto: any) {
-    return this.newsService.updateLikeCount({id, cretaeNewsDto});
+  updateLikeCount(@Param('id') id: string) {
+    return this.newsService.updateLikeCount(id);
   }
 
   @Delete(':id')
