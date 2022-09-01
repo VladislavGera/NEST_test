@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateNewsDto } from 'src/dto/create-news.dto';
+import { CreateNewsDto, ItemNewsDto } from 'src/dto/create-news.dto';
 import { News } from '../schemas/news.schema';
 import { NewsDocument } from '../schemas/news.schema';
 
@@ -9,7 +9,7 @@ import { NewsDocument } from '../schemas/news.schema';
 export class NewsService {
   constructor(@InjectModel(News.name) private newsModel: Model<NewsDocument>) {}
 
-  async getNewsPortion(page): Promise<any[]> {
+  async getNewsPortion(page): Promise<CreateNewsDto[]> {
     let pageSize = 10;
     const skips = page * (pageSize - 1);
 
@@ -24,7 +24,7 @@ export class NewsService {
     const news = (
       await this.newsModel.find(data.categoryObj).skip(skips).limit(pageSize)
     ).map((item) => {
-      let description = item.description.slice(0, 20);
+      let description: string = item.description.slice(0, 20);
       let res = { ...item.toObject(), description };
       return res;
     });
@@ -32,7 +32,7 @@ export class NewsService {
     return news;
   }
 
-  async getNewsById(id: string): Promise<any> {
+  async getNewsById(id: string): Promise<ItemNewsDto> {
     let news = await this.newsModel.findById(id);
 
     const res = {
@@ -46,20 +46,20 @@ export class NewsService {
     return res;
   }
 
-  async deleteNews(id: string): Promise<any> {
+  async deleteNews(id: string): Promise<CreateNewsDto> {
     return this.newsModel.findByIdAndRemove(id);
   }
 
-  createNews(newsDto: CreateNewsDto): Promise<any> {
+  createNews(newsDto: CreateNewsDto): Promise<CreateNewsDto> {
     const newProduct = new this.newsModel(newsDto);
     return newProduct.save();
   }
 
-  async updateLikeCount(data): Promise<any> {
-    const news = await this.getNewsById(data.id);
+  async updateLikeCount(id): Promise<CreateNewsDto | any> {
+    const news = await this.getNewsById(id);
 
     if (news.likes < 2000000) {
-      const updateLikesCount = this.newsModel.findByIdAndUpdate(data.id, {
+      const updateLikesCount = this.newsModel.findByIdAndUpdate(id, {
         likes: news.likes + 1,
       });
 
